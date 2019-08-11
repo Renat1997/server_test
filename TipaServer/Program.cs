@@ -16,7 +16,7 @@ namespace TipaServer
         public static void Main(string[] args)
         {
             Connector connector = new Connector();
-            connector.Server();
+            Console.ReadKey();
           
         }
 

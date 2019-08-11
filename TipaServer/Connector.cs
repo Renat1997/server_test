@@ -14,58 +14,52 @@ namespace TipaServer
     {
         public Connector()
         {
-            tcpClient = new TcpClient();
+            adminContext db = new adminContext();
+            var info = db.Infoes.Select(p => p.Port);
 
-                adminContext db = new adminContext();
-                var info = db.Infoes.Select(c => c.Port);
-                foreach (int port in info)
+            foreach (int port in info)
+            {
+                Task.Run(() =>
                 {
-                  
-                    Console.WriteLine(port);
-
-                    Task.Run(() =>
-                    {
-                        
-                    });
-                }    
+                    Connect(port);
+                });
+            }
         }
 
-       private TcpClient tcpClient;
-
         private NetworkStream stream;
-        public void Server(int port)
+
+        public void Connect(int port)
         {
+            var tcpClient = new TcpClient();
             while (true)
             {
 
-              try
-              {
+                try
+                {
                     if (tcpClient != null && tcpClient.Client != null && !tcpClient.Client.Connected)
                     {
-                        tcpClient = new TcpClient();
                         tcpClient.Connect("127.0.0.1", port);
+                        Console.WriteLine("Подключение к порту " + port + " " + DateTime.Now);
                         stream = tcpClient.GetStream();
                     }
-                    
-                        
-                    
-                      byte[] data = new byte[64]; // буфер для получаемых данных
-                      StringBuilder builder = new StringBuilder();
-                      int bytes = 0;
-                        do
-                        {
-                         bytes = stream.Read(data, 0, data.Length);
-                         builder.Append(Encoding.Unicode.GetString(data, 0, bytes));
-                        }
-                        while (stream.DataAvailable);
-
-                        string message = builder.ToString();
-                        Console.WriteLine(FromStringBitToEnum(message));
-              }
-              catch
-              {    }
 
 
+
+                    byte[] data = new byte[64]; // буфер для получаемых данных
+                    StringBuilder builder = new StringBuilder();
+                    int bytes = 0;
+                    do
+                    {
+                        bytes = stream.Read(data, 0, data.Length);
+                        builder.Append(Encoding.Unicode.GetString(data, 0, bytes));
+                    }
+                    while (stream.DataAvailable);
+
+                    string message = builder.ToString();
+                    Console.WriteLine(FromStringBitToEnum(message));
+                }
+                catch
+                { }
             }
         }
 
